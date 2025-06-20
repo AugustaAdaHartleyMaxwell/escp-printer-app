@@ -336,7 +336,7 @@ int main(int argc, char *argv[])
 	return papplMainloop(
 		argc, argv,
 		"1.0",
-		"Copyright &copy; 2025 by Ada Hartley. Provided under the terms of the <a href=\"https://www.gnu.org/licenses/gpl-3.0.en.html\">GNU General Public License Version 3</a> or later.",
+		"Copyright &copy; 2025 Augusta Ada Hartley Maxwell. Provided under the terms of the <a href=\"https://www.gnu.org/licenses/gpl-3.0.en.html\">GNU General Public License Version 3</a> or later.",
 		(int)(sizeof(escp_drivers) / sizeof(escp_drivers[0])),
 		escp_drivers, escp_autoadd, escp_callback,
 		NULL, NULL,
