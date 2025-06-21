@@ -27,7 +27,8 @@ static pappl_pr_driver_t escp_drivers[] = {
 	{"epson_9pin_series", "Epson 9-Pin Series", "CMD:ESCP9;", NULL}
 };
 
-typedef struct escp_s {
+typedef struct escp_s
+{
 	float *buffer;
 	unsigned char *line;
 	int line_width;
@@ -54,7 +55,7 @@ bool escp_printfile(pappl_job_t *job, pappl_pr_options_t *options, pappl_device_
 	char buffer[65536];
 
 	papplJobSetImpressions(job, 1);
-	
+
 	while ((bytes = read(fd, buffer, sizeof(buffer))) > 0)
 	{
 		if (papplDeviceWrite(device, buffer, (size_t)bytes) < 0)
@@ -68,7 +69,7 @@ bool escp_printfile(pappl_job_t *job, pappl_pr_options_t *options, pappl_device_
 	close(fd);
 
 	papplJobSetImpressionsCompleted(job, 1);
-	
+
 	return true;
 }
 
@@ -81,7 +82,7 @@ bool escp_rstartjob(pappl_job_t *job, pappl_pr_options_t *options, pappl_device_
 	papplJobSetData(job, escp);
 
 	if (papplDevicePuts(device, "\033@\r") < 0) return false;
-	
+
 	return true;
 }
 
@@ -107,10 +108,10 @@ bool escp_rstartpage(pappl_job_t *job, pappl_pr_options_t *options, pappl_device
 		escp->dot_density = '3';
 		break;
 	}
-	
+
 	escp->print_lines = escp->fields * 8;
 	escp->buffer_lines = escp->print_lines + 2;
-	
+
 	escp->line_width = (options->printer_resolution[0] * (options->media.size_width - options->media.left_margin - options->media.right_margin)) / 2540;
 	escp->line_offset = (options->printer_resolution[0] * options->media.left_margin) / 2540;
 
@@ -123,16 +124,16 @@ bool escp_rstartpage(pappl_job_t *job, pappl_pr_options_t *options, pappl_device
 	escp->line = realloc(escp->line, escp->line_width);
 
 	escp->file = fopen("test.data", "wb");
-	
+
 	return true;
 }
 
 bool escp_rwriteline(pappl_job_t *job, pappl_pr_options_t *options, pappl_device_t *device, unsigned y, const unsigned char *line)
 {
 	escp_t *escp = (escp_t *)papplJobGetData(job);
-	
+
 	y -= escp->page_offset;
-	
+
 	if (y >= 0 && y < escp->page_length)
 	{
 		for (int i = 0; i < escp->line_width; i++)
@@ -185,7 +186,7 @@ bool escp_rwriteline(pappl_job_t *job, pappl_pr_options_t *options, pappl_device
 			}
 			papplDeviceFlush(device);
 		}
-			
+
 		memset(escp->buffer + ((y + 3) % escp->buffer_lines) * escp->line_width, 0, escp->line_width * sizeof(float));
 	}
 
@@ -198,7 +199,7 @@ bool escp_rendpage(pappl_job_t *job, pappl_pr_options_t *options, pappl_device_t
 
 	fclose(escp->file);
 	if (papplDevicePuts(device, "\f") < 0) return false;
-	
+
 	return true;
 }
 
@@ -209,7 +210,7 @@ bool escp_rendjob(pappl_job_t *job, pappl_pr_options_t *options, pappl_device_t 
 	free(escp->buffer);
 	free(escp->line);
 	free(escp);
-	
+
 	return true;
 }
 
@@ -265,23 +266,23 @@ bool escp_callback(pappl_system_t *system, const char *driver_name, const char *
 		driver_data->y_resolution[2] = 216;
 		driver_data->x_default = 240;
 		driver_data->y_default = 216;
-	
+
 		driver_data->raster_types = PAPPL_PWG_RASTER_TYPE_SGRAY_8;
 		driver_data->color_supported = PAPPL_COLOR_MODE_MONOCHROME;
 		driver_data->color_default = PAPPL_COLOR_MODE_MONOCHROME;
-	
+
 		driver_data->num_media = 1;
 		driver_data->media[0] = "na_letter_8.5x11in";
-	
+
 		driver_data->left_right = 300;
 		driver_data->bottom_top = 850;
-	
+
 		driver_data->sides_supported = PAPPL_SIDES_ONE_SIDED;
 		driver_data->sides_default = PAPPL_SIDES_ONE_SIDED;
-	
+
 		driver_data->num_source = 1;
 		driver_data->source[0]  = "tray-1";
-	
+
 		driver_data->num_type = 1;
 		driver_data->type[0] = "stationery";
 	}
@@ -289,9 +290,9 @@ bool escp_callback(pappl_system_t *system, const char *driver_name, const char *
 	for (int i = 0; i < driver_data->num_source; i ++)
 	{
 		pwg_media_t *pwg;
-		
+
 		papplCopyString(driver_data->media_ready[i].size_name, "na_letter_8.5x11in", sizeof(driver_data->media_ready[i].size_name));
-		
+
 		if ((pwg = pwgMediaForPWG(driver_data->media_ready[i].size_name)) != NULL)
 		{
 			driver_data->media_ready[i].bottom_margin = 1350;
@@ -336,7 +337,7 @@ int main(int argc, char *argv[])
 	return papplMainloop(
 		argc, argv,
 		"1.0",
-		"Copyright &copy; 2025 Augusta Ada Hartley Maxwell. Provided under the terms of the <a href=\"https://www.gnu.org/licenses/gpl-3.0.en.html\">GNU General Public License Version 3</a> or later.",
+		"Copyright &copy; 2025 Ada Hartley. Provided under the terms of the <a href=\"https://www.gnu.org/licenses/gpl-3.0.en.html\">GNU General Public License Version 3</a> or later.",
 		(int)(sizeof(escp_drivers) / sizeof(escp_drivers[0])),
 		escp_drivers, escp_autoadd, escp_callback,
 		NULL, NULL,
