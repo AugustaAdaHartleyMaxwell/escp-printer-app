@@ -1,0 +1,69 @@
+name: Build
+
+on:
+  push:
+    branches: [ master, v1.4.x ]
+  pull_request:
+    branches: [ master, v1.4.x ]
+  workflow_dispatch:
+
+jobs:
+  build-linux:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout PAPPL sources
+      uses: actions/checkout@v4
+    - name: Update build environment
+      run: sudo apt-get update --fix-missing -y
+    - name: Install prerequisites
+      run: sudo apt-get install -y avahi-daemon cppcheck libavahi-client-dev libcups2-dev libgnutls28-dev libjpeg-dev libpam-dev libpng-dev libusb-1.0-0-dev zlib1g-dev
+    - name: Configure PAPPL
+      env:
+        CC: /usr/bin/gcc
+      run: ./configure --enable-debug --enable-maintainer
+    - name: Build PAPPL
+      run: make
+    - name: Test PAPPL
+      env:
+        ASAN_OPTIONS: leak_check_at_exit=false
+      run: make test || cat testsuite/test*.log
+    - name: Run Clang Static Analyzer
+      run: cd pappl && make CC=clang "GHA_ERROR=::error::" clang
+    - name: Run cppcheck
+      run: cd pappl && make "GHA_ERROR=::error::" cppcheck
+
+  build-macos:
+
+    runs-on: macos-latest
+
+    steps:
+    - name: Checkout PAPPL sources
+      uses: actions/checkout@v4
+    - name: Install Prerequisites
+      run: brew install cppcheck libjpeg libpng libusb openssl@3
+    - name: Configure PAPPL
+      run: ./configure --enable-debug --enable-maintainer --with-sanitizer=address
+    - name: Build PAPPL
+      run: make
+    - name: Test PAPPL
+      run: make test || cat testsuite/test*.log
+    - name: Run Clang Static Analyzer
+      run: cd pappl && make "GHA_ERROR=::error::" clang
+
+  build-windows:
+
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: setup-msbuild
+      uses: microsoft/setup-msbuild@v1.0.2
+    - name: nuget restore
+      run: cd vcnet; nuget restore pappl.sln
+    - name: msbuild
+      run: cd vcnet; msbuild pappl.sln
+    - name: test
+      run: cd vcnet; ./copy-dlls.bat x64\Debug; cd x64\Debug; ./testpappl -c -l testpappl.log -o testpappl.output -t api,client,pwg-raster
+
