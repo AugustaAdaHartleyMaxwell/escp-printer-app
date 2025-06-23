@@ -123,7 +123,7 @@ bool escp_rstartpage(pappl_job_t *job, pappl_pr_options_t *options, pappl_device
 
 	escp->line = realloc(escp->line, escp->line_width);
 
-	escp->file = fopen("test.data", "wb");
+//	escp->file = fopen("test.data", "wb");
 
 	return true;
 }
@@ -144,20 +144,20 @@ bool escp_rwriteline(pappl_job_t *job, pappl_pr_options_t *options, pappl_device
 			float error = new_pixel - *pixel;
 			*pixel = new_pixel;
 
-			struct { int x; int y; int a; } var[] = {
-				                                   {1, 0, 7}, {2, 0, 5},
-				{-2, 1, 3}, {-1, 1, 5}, {0, 1, 7}, {1, 1, 5}, {2, 1, 3},
-				{-2, 2, 1}, {-1, 2, 3}, {0, 2, 5}, {1, 2, 3}, {2, 2, 1}
+			const int var[] = {
+				         7, 5,
+				3, 5, 7, 5, 3,
+				1, 3, 5, 3, 1
 			};
 
-			for (int j = 0; j < sizeof(var) / sizeof(var[0]); j++) {
-				int x1 = i + var[j].x;
-				int y1 = y + var[j].y;
+			for (int j = 3; j < sizeof(var) / sizeof(var[0]) + 3; j++) {
+				int x1 = i + j % 5;
+				int y1 = y + j / 5;
 				if (x1 >= 0 && x1 < escp->line_width)
-					escp_getline(escp, y1)[x1] -= (error * var[j].a) / 48.0;
+					escp_getline(escp, y1)[x1] -= (error * var[j]) / 48.0;
 			}
 		}
-		fwrite(escp_getline(escp, y), sizeof(float), escp->line_width, escp->file);
+//		fwrite(escp_getline(escp, y), sizeof(float), escp->line_width, escp->file);
 
 		if (y % escp->print_lines == escp->print_lines - 1)
 		{
@@ -197,7 +197,7 @@ bool escp_rendpage(pappl_job_t *job, pappl_pr_options_t *options, pappl_device_t
 {
 	escp_t *escp = (escp_t *)papplJobGetData(job);
 
-	fclose(escp->file);
+//	fclose(escp->file);
 	if (papplDevicePuts(device, "\f") < 0) return false;
 
 	return true;

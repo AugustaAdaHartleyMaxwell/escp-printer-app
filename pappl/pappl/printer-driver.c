@@ -464,14 +464,14 @@ make_attrs(
   num_values = 0;
   svalues[num_values ++] = "application/octet-stream";
   svalues[num_values ++] = "image/pwg-raster";
-  svalues[num_values ++] = "image/urf";
+  //svalues[num_values ++] = "image/urf";
 
   if (data->format && strcmp(data->format, "application/octet-stream"))
     svalues[num_values ++] = data->format;
 
-  for (preferred = "image/urf", filter = (_pappl_mime_filter_t *)cupsArrayGetFirst(system->filters); filter; filter = (_pappl_mime_filter_t *)cupsArrayGetNext(system->filters))
+  for (preferred = "image/pwg-raster", filter = (_pappl_mime_filter_t *)cupsArrayGetFirst(system->filters); filter; filter = (_pappl_mime_filter_t *)cupsArrayGetNext(system->filters))
   {
-    if ((data->format && !strcmp(filter->dst, data->format)) || !strcmp(filter->dst, "image/pwg-raster"))
+    if ((data->format && !strcmp(filter->dst, data->format)) || !strcmp(filter->dst, "image/urf"))
     {
       for (i = 0; i < num_values; i ++)
       {
@@ -1394,7 +1394,7 @@ make_attrs(
 
     svalues[num_values ++] = rs;
 
-    ippAddStrings(attrs, IPP_TAG_PRINTER, IPP_TAG_KEYWORD, "urf-supported", num_values, NULL, svalues);
+    //ippAddStrings(attrs, IPP_TAG_PRINTER, IPP_TAG_KEYWORD, "urf-supported", num_values, NULL, svalues);
   }
 
   return (attrs);
